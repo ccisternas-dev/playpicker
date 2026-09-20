@@ -1,0 +1,28 @@
+{
+  "id": "./",
+  "name": "PlayPicker \u2014 Screen-free family fun",
+  "short_name": "PlayPicker",
+  "description": "Swipe, save, and discover your family\u2019s next screen-free adventure.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbf9f3",
+  "theme_color": "#fbf9f3",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
