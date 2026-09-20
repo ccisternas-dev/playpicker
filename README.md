@@ -35,3 +35,7 @@ The page footer also includes installation instructions. Supporting browsers off
 For a local preview only, connect the phone to the same Wi-Fi as the Mac and open `http://YOUR_MAC_LAN_IP/playpicker/` while MAMP is running. `localhost` on the phone refers to the phone, not your Mac. An HTTP LAN preview does not provide service-worker offline support or full PWA installation eligibility; use HTTPS for installation. No deployment is performed by this project.
 
 After one successful online load on HTTPS (or localhost on the development machine), the service worker caches the application and activity data for offline use. Optional Google Fonts require a connection; system fonts work offline. Saved activities are local to the current browser or installed app and do not sync. Passed cards and undo history reset when the page reloads.
+
+## Languages
+
+Use the ES / EN button in the header to switch between English and Spanish. The preference is remembered in localStorage; English is the default. All activity content, interface labels, instructions, and installation help are translated. Search is accent-insensitive in the selected language. Switching languages preserves saved activities, current filters, and swipe history. `i18n.js` contains the Spanish interface dictionary and activity translations and is included in the offline cache.

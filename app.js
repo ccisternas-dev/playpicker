@@ -27,42 +27,43 @@ function illustration(a) {
   return `<svg viewBox="0 0 330 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><ellipse cx="165" cy="168" rx="114" ry="9" fill="#526447" opacity=".07"/>${shapes}<circle cx="44" cy="47" r="3" fill="#fffaf0"/><path d="M279 43v12m-6-6h12" stroke="#fffaf0" stroke-width="2"/></svg>`;
 }
 function filteredActivities() {
-  const query = $('#search').value.trim().toLowerCase();
+  const query = normalizeSearch($('#search').value.trim());
   const age = Number($('#age').value);
-  return ACTIVITIES.filter(a => (!collection || saved.has(a.id)) && (category === 'All' || a.category === category) && (!query || [a.title,a.description,a.category,...a.materials].join(' ').toLowerCase().includes(query)) && (!age || age >= a.age[0] && age <= a.age[1]) && (!$('#time').value || a.time <= Number($('#time').value)) && (!$('#setting').value || a.setting === $('#setting').value) && (!$('#mess').value || a.mess === $('#mess').value));
+  return ACTIVITIES.map(localizeActivity).filter(a => (!collection || saved.has(a.id)) && (category === 'All' || a.category === category) && (!query || normalizeSearch([a.title,a.description,t(a.category),...a.materials].join(' ')).includes(query)) && (!age || age >= a.age[0] && age <= a.age[1]) && (!$('#time').value || a.time <= Number($('#time').value)) && (!$('#setting').value || a.setting === $('#setting').value) && (!$('#mess').value || a.mess === $('#mess').value));
 }
 function render() {
   const activities = filteredActivities();
   $('#saved-count').textContent = saved.size;
-  $('#result-count').innerHTML = `<strong>${activities.length} ${activities.length === 1 ? 'activity' : 'activities'}</strong> ${collection ? 'in your collection' : 'for a little everyday adventure'}`;
-  $('#browse-title').textContent = collection ? 'Your next little adventures' : 'Your next “let’s do that!”';
+  $('#result-count').innerHTML = `<strong>${activities.length} ${activities.length === 1 ? t('activity') : t('activities')}</strong> ${collection ? t('in your collection') : t('for a little everyday adventure')}`;
+  $('#browse-title').textContent = collection ? t('Your next little adventures') : t('Your next “let’s do that!”');
   $('#discover').classList.toggle('active', !collection);
   $('#saved').classList.toggle('active', collection);
   $('#discover').setAttribute('aria-pressed', String(!collection));
   $('#saved').setAttribute('aria-pressed', String(collection));
   document.querySelectorAll('.chip').forEach(c => {c.classList.toggle('selected', c.dataset.category === category);c.setAttribute('aria-pressed', String(c.dataset.category === category));});
-  $('#activity-grid').innerHTML = activities.map(a => `<article class="card"><button class="save-button ${saved.has(a.id) ? 'is-saved' : ''}" data-save="${a.id}" aria-label="${saved.has(a.id) ? 'Unsave' : 'Save'} ${a.title}" aria-pressed="${saved.has(a.id)}">${saved.has(a.id) ? '♥' : '♡'}</button><button class="card-open" data-open="${a.id}" aria-label="View ${a.title}"><div class="card-art" style="background:${a.color}">${illustration(a)}<span class="card-badge">${a.badge}</span></div><div class="card-body"><span class="card-category">${a.category.replace('&','&amp;')}</span><h3>${a.title}</h3><p class="card-description">${a.description}</p><div class="card-meta"><span>◷ ${a.time} min</span><span>♧ Ages ${a.age.join('–')}</span><span>${a.setting === 'Outdoors' ? '☀' : '⌂'} ${a.setting}</span></div></div></button></article>`).join('');
+  $('#activity-grid').innerHTML = activities.map(a => `<article class="card"><button class="save-button ${saved.has(a.id) ? 'is-saved' : ''}" data-save="${a.id}" aria-label="${saved.has(a.id) ? t('Unsave') : t('Save')} ${a.title}" aria-pressed="${saved.has(a.id)}">${saved.has(a.id) ? '♥' : '♡'}</button><button class="card-open" data-open="${a.id}" aria-label="${t('View')} ${a.title}"><div class="card-art" style="background:${a.color}">${illustration(a)}<span class="card-badge">${a.badge}</span></div><div class="card-body"><span class="card-category">${t(a.category).replace('&','&amp;')}</span><h3>${a.title}</h3><p class="card-description">${a.description}</p><div class="card-meta"><span>◷ ${a.time} min</span><span>♧ ${t('Ages')} ${a.age.join('–')}</span><span>${a.setting === 'Outdoors' ? '☀' : '⌂'} ${t(a.setting)}</span></div></div></button></article>`).join('');
   $('#activity-grid').hidden = !collection;
   $('#swipe-discovery').hidden = collection;
   $('#empty').hidden = !collection || activities.length > 0;
   renderDeck();
   const activeFilters = ['search','age','time','setting','mess'].filter(id => $('#'+id).value).length + (category !== 'All' ? 1 : 0);
-  $('#filter-count').textContent = activeFilters ? `(${activeFilters})` : ''; 
-  $('#empty-message').textContent = collection && !saved.size ? 'Tap a heart on any activity to keep it here for another day.' : 'No activities match just yet. Try a different filter or explore them all.';
+  $('#filter-count').textContent = activeFilters ? `(${activeFilters})` : '';
+  $('#empty-message').textContent = collection && !saved.size ? t('Tap a heart on any activity to keep it here for another day.') : t('No activities match just yet. Try a different filter or explore them all.');
 }
 function toast(message) { clearTimeout(toastTimer); $('#toast').textContent = message; $('#toast').classList.add('visible'); toastTimer = setTimeout(() => $('#toast').classList.remove('visible'), 3000); }
 function toggleSave(id) {
   saved.has(id) ? saved.delete(id) : saved.add(id);
   try { localStorage.setItem('playpicker-saved', JSON.stringify([...saved])); storageAvailable = true; } catch { storageAvailable = false; }
-  toast(storageAvailable ? (saved.has(id) ? 'Saved for another little adventure ♡' : 'Removed from your collection') : 'Saved for this visit. Browser storage is unavailable.');
+  toast(storageAvailable ? (saved.has(id) ? t('Saved for another little adventure ♡') : t('Removed from your collection')) : t('Saved for this visit. Browser storage is unavailable.'));
   render();
   const button = $('.dialog-save');
-  if(button && button.dataset.save === id) {button.textContent = saved.has(id) ? '♥ Saved to my collection' : '♡ Save to my collection';button.setAttribute('aria-pressed', String(saved.has(id)));}
+  if(button && button.dataset.save === id) {button.textContent = saved.has(id) ? t('♥ Saved to my collection') : t('♡ Save to my collection');button.setAttribute('aria-pressed', String(saved.has(id)));}
 }
 function openActivity(id) {
-  const a = ACTIVITIES.find(a => a.id === id);
+  const original = ACTIVITIES.find(a => a.id === id);
+  const a = original && localizeActivity(original);
   if(!a) return;
-  $('#dialog-content').innerHTML = `<div class="dialog-art" style="background:${a.color}">${illustration(a)}</div><div class="dialog-body"><span class="eyebrow">${a.category.replace('&','&amp;')}</span><h2 id="dialog-title">${a.title}</h2><p>${a.description}</p><div class="detail-tags"><span>◷ ${a.time} minutes</span><span>Ages ${a.age.join('–')}</span><span>${a.setting}</span><span>${a.mess} mess</span></div><h3>Gather a few things</h3><ul>${a.materials.map(m => `<li>${m}</li>`).join('')}</ul><h3>Let’s make it happen</h3><ol>${a.steps.map(s => `<li>${s}</li>`).join('')}</ol><p class="tip"><strong>A little grown-up note</strong><br>${a.tip}</p><button class="primary dialog-save" data-save="${a.id}" aria-pressed="${saved.has(a.id)}">${saved.has(a.id) ? '♥ Saved to my collection' : '♡ Save to my collection'}</button></div>`;
+  $('#dialog-content').innerHTML = `<div class="dialog-art" style="background:${a.color}">${illustration(a)}</div><div class="dialog-body"><span class="eyebrow">${t(a.category).replace('&','&amp;')}</span><h2 id="dialog-title">${a.title}</h2><p>${a.description}</p><div class="detail-tags"><span>◷ ${a.time} ${t('minutes')}</span><span>${t('Ages')} ${a.age.join('–')}</span><span>${t(a.setting)}</span><span>${t(a.mess + ' mess')}</span></div><h3>${t("Gather a few things")}</h3><ul>${a.materials.map(m => `<li>${m}</li>`).join('')}</ul><h3>${t("Let’s make it happen")}</h3><ol>${a.steps.map(s => `<li>${s}</li>`).join('')}</ol><p class="tip"><strong>${t("A little grown-up note")}</strong><br>${a.tip}</p><button class="primary dialog-save" data-save="${a.id}" aria-pressed="${saved.has(a.id)}">${saved.has(a.id) ? t('♥ Saved to my collection') : t('♡ Save to my collection')}</button></div>`;
   $('#activity-dialog').showModal();
   $('#activity-dialog').scrollTop = 0;
   document.body.classList.add('modal-open');
@@ -93,15 +94,15 @@ function renderDeck() {
   $('#undo').disabled = !history.length || busy;
   ['pass','like','details'].forEach(id => $('#'+id).disabled = !a || busy);
   if(collection) return;
-  $('#result-count').innerHTML = `<strong>${remaining.length} ${remaining.length === 1 ? 'idea' : 'ideas'}</strong> left to discover`;
+  $('#result-count').innerHTML = `<strong>${remaining.length} ${remaining.length === 1 ? t('idea') : t('ideas')}</strong> ${t('left to discover')}`;
   if(!a) {
     const hasMatches = filteredActivities().length > 0;
-    $('#deck').innerHTML = `<div class="deck-empty"><span> ${hasMatches ? '♡' : '✳'}</span><h3>${hasMatches ? 'A little inspiration, collected.' : 'Let’s try a different mix.'}</h3><p>${hasMatches ? 'You’ve explored these ideas. Your favorites are waiting in your collection.' : 'No ideas match these filters. Give your next adventure a little more room.'}</p><button class="primary" id="deck-restart">${hasMatches ? 'Revisit passed activities' : 'Reset filters'}</button><button class="text-button" id="deck-collection">View my collection →</button></div>`;
+    $('#deck').innerHTML = `<div class="deck-empty"><span> ${hasMatches ? '♡' : '✳'}</span><h3>${hasMatches ? t('A little inspiration, collected.') : t('Let’s try a different mix.')}</h3><p>${hasMatches ? t('You’ve explored these ideas. Your favorites are waiting in your collection.') : t('No ideas match these filters. Give your next adventure a little more room.')}</p><button class="primary" id="deck-restart">${hasMatches ? t('Revisit passed activities') : t('Reset filters')}</button><button class="text-button" id="deck-collection">${t("View my collection →")}</button></div>`;
     $('#deck-restart').addEventListener('click', () => { if(hasMatches) {seen.clear();history.length = 0;if(!remainingActivities().length) {collection = true;resetFilters();return;}render();} else resetFilters(); });
     $('#deck-collection').addEventListener('click', () => {collection = true;resetFilters();});
     return;
   }
-  $('#deck').innerHTML = `<div class="stack-card stack-back" aria-hidden="true"></div><div class="stack-card stack-middle" aria-hidden="true"></div><article class="swipe-card" aria-label="${a.title}" tabindex="0" aria-describedby="swipe-help"><div class="swipe-visual" style="background:${a.color}"><span class="swipe-category">${a.category.replace('&','&amp;')}</span><span class="swipe-stamp save-stamp">LOVE IT</span><span class="swipe-stamp pass-stamp">NOT TODAY</span>${illustration(a)}<span class="swipe-badge">✧ &nbsp; ${a.badge}</span></div><div class="swipe-body"><span class="swipe-kicker">A LITTLE CREATIVITY GOES A LONG WAY</span><h3>${a.title}</h3><p>${a.description}</p><div class="swipe-tags"><span>◷ ${a.time} min</span><span>♧ Ages ${a.age.join('–')}</span><span>${a.setting === 'Outdoors' ? '☀' : '⌂'} ${a.setting}</span><span>✳ ${a.mess} mess</span></div><button class="card-details" data-open="${a.id}">See what you’ll need <span>↗</span></button></div><span class="sr-only" id="swipe-help">Use the left arrow to pass or right arrow to save. Use the buttons below as an alternative to swiping.</span></article>`;
+  $('#deck').innerHTML = `<div class="stack-card stack-back" aria-hidden="true"></div><div class="stack-card stack-middle" aria-hidden="true"></div><article class="swipe-card" aria-label="${a.title}" tabindex="0" aria-describedby="swipe-help"><div class="swipe-visual" style="background:${a.color}"><span class="swipe-category">${t(a.category).replace('&','&amp;')}</span><span class="swipe-stamp save-stamp">${t("LOVE IT")}</span><span class="swipe-stamp pass-stamp">${t("NOT TODAY")}</span>${illustration(a)}<span class="swipe-badge">✧ &nbsp; ${a.badge}</span></div><div class="swipe-body"><span class="swipe-kicker">${t("A LITTLE CREATIVITY GOES A LONG WAY")}</span><h3>${a.title}</h3><p>${a.description}</p><div class="swipe-tags"><span>◷ ${a.time} min</span><span>♧ ${t('Ages')} ${a.age.join('–')}</span><span>${a.setting === 'Outdoors' ? '☀' : '⌂'} ${t(a.setting)}</span><span>✳ ${t(a.mess + ' mess')}</span></div><button class="card-details" data-open="${a.id}">${t("See what you’ll need")} <span>↗</span></button></div><span class="sr-only" id="swipe-help">${t("Use the left arrow to pass or right arrow to save. Use the buttons below as an alternative to swiping.")}</span></article>`;
   bindSwipe($('.swipe-card'));
 }
 function persistSaved() {
@@ -121,10 +122,10 @@ async function choose(direction) {
   if(!reduceMotion) await new Promise(resolve => setTimeout(resolve,240));
   history.push({id:a.id,direction,wasSaved:saved.has(a.id)});
   seen.add(a.id);
-  if(direction === 'save') {saved.add(a.id);persistSaved();toast(storageAvailable ? 'It’s a little match! Saved to your collection ♥' : 'Saved for this visit. Browser storage is unavailable.');}
+  if(direction === 'save') {saved.add(a.id);persistSaved();toast(storageAvailable ? t('It’s a little match! Saved to your collection ♥') : t('Saved for this visit. Browser storage is unavailable.'));}
   busy = false;
   render();
-  $('#deck-announcement').textContent = `${a.title} ${direction === 'save' ? 'saved' : 'passed'}. ${remainingActivities().length} ideas remaining.`;
+  $('#deck-announcement').textContent = `${a.title} ${direction === 'save' ? t('saved') : t('passed')}. ${remainingActivities().length} ${t('ideas remaining.')}`;
   if(restoreFocus) ($('.swipe-card') || $('#deck-restart')).focus({preventScroll:true});
 }
 function bindSwipe(card) {
@@ -163,7 +164,18 @@ $('#undo').addEventListener('click', () => {
   if(busy || !history.length) return;
   const last = history.pop();seen.delete(last.id);
   if(last.direction === 'save' && !last.wasSaved) {saved.delete(last.id);persistSaved();}
-  render();toast('Last swipe undone. Give it another look.');
+  render();toast(t('Last swipe undone. Give it another look.'));
+});
+translateStaticPage();
+$('#language-toggle').addEventListener('click', () => {
+  if (busy) return;
+  language = language === 'en' ? 'es' : 'en';
+  try { localStorage.setItem('playpicker-language', language); } catch {}
+  translateStaticPage();
+  clearTimeout(toastTimer);
+  $('#toast').classList.remove('visible');
+  $('#deck-announcement').textContent = '';
+  render();
 });
 $('#filter-toggle').addEventListener('click', () => {const open = $('#filter-panel').hidden;$('#filter-panel').hidden = !open;$('#filter-toggle').setAttribute('aria-expanded', String(open));});
 render();
@@ -178,7 +190,7 @@ $('#native-install').addEventListener('click', async () => {
   if(!installPrompt) return;
   await installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('#native-install').hidden=true;
 });
-window.addEventListener('appinstalled', () => {installPrompt=null;$('#native-install').hidden=true;$('#install-dialog').close();toast('PlayPicker is ready on your home screen.');});
+window.addEventListener('appinstalled', () => {installPrompt=null;$('#native-install').hidden=true;$('#install-dialog').close();toast(t('PlayPicker is ready on your home screen.'));});
 if('serviceWorker' in navigator && window.isSecureContext) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => console.info('Offline support is unavailable for this visit.')));
 }
