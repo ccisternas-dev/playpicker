@@ -17,7 +17,7 @@ Open `http://localhost/playpicker/` with MAMP running (this MAMP installation us
 - Installable web app manifest, home-screen icons, and offline app shell.
 - Responsive layouts, keyboard-accessible controls, and native modal dialogs.
 
-`activities.js` holds the curated activity data. `app.js` handles the swipe deck, inline SVG illustrations, dialogs, and saved activities. `styles.css` contains the responsive design. Google Fonts is optional; system sans-serif fallbacks are provided. No external image service or JavaScript dependency is required.
+`activities.js` holds the curated activity data. `app.js` handles the swipe deck, dialogs, and saved activities. `illustrations.js` holds the decorative SVG artwork. `styles.css` contains the responsive design. Google Fonts is optional; system sans-serif fallbacks are provided. No external image service or JavaScript dependency is required.
 
 Collections belong to the current browser and do not sync between devices. This MVP has no backend, account system, or analytics. Activity age ranges are suggestions; grown-ups should adapt activities and supervise as appropriate.
 
@@ -39,3 +39,19 @@ After one successful online load on HTTPS (or localhost on the development machi
 ## Languages
 
 Use the ES / EN button in the header to switch between English and Spanish. The preference is remembered in localStorage; English is the default. All activity content, interface labels, instructions, and installation help are translated. Search is accent-insensitive in the selected language. Switching languages preserves saved activities, current filters, and swipe history. `i18n.js` contains the Spanish interface dictionary and activity translations and is included in the offline cache.
+
+## Development quality checks
+
+The app still runs without a build step or production dependencies. Development tools are pinned in `package-lock.json`:
+
+```sh
+npm ci
+npx playwright install chromium
+npm run format
+npm run check
+npm test
+```
+
+Tests run a temporary local server and isolated browser profiles. If needed, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to an existing Chromium executable. Generated screenshots are written to the ignored `test-results/` directory.
+
+Follow [AGENTS.md](AGENTS.md) for coding, internationalization, and WCAG 2.2 AA requirements. [ACCESSIBILITY.md](ACCESSIBILITY.md) records implemented improvements, automated verification, and the manual checks still needed before a conformance claim.

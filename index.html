@@ -1,4 +1,413 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#fbf9f3"><meta name="description" content="Less screen time, more play time. Discover simple, creative activities for your family with PlayPicker."><title>PlayPicker — Little ideas. Big adventures.</title><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icons/icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="PlayPicker"><link rel="stylesheet" href="styles.css"><script src="activities.js" defer></script><script src="i18n.js" defer></script><script src="app.js" defer></script></head>
-<body><header class="header"><a class="brand" href="./" aria-label="PlayPicker home"><span class="brand-mark">✳</span>PlayPicker<span class="brand-dot">•</span></a><nav aria-label="Main navigation"><button class="nav-button active" id="discover">Discover</button><button class="nav-button" id="saved">My collection <span id="saved-count">0</span></button></nav><button id="language-toggle" class="language-toggle" type="button" aria-label="Cambiar a español" lang="es">ES</button><span class="header-note">Less scrolling. More playing.</span></header>
-<main><section class="browse" aria-labelledby="browse-title"><div class="section-heading"><div><span class="eyebrow">FIND YOUR NEXT LITTLE ADVENTURE</span><h2 id="browse-title">Your next “let’s do that!”</h2></div><button id="filter-toggle" class="filter-toggle" aria-expanded="false" aria-controls="filter-panel">☷ &nbsp; Filters <span id="filter-count"></span></button></div><div id="filter-panel" hidden><div class="discovery-controls"><div class="search-wrap"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Try cardboard, painting, nature…" aria-label="Search activities"></div><div class="filters"><label>Age<select id="age"><option value="">Any age</option><option value="2">2–3 years</option><option value="4">4–5 years</option><option value="6">6–8 years</option><option value="9">9–12 years</option></select></label><label>Time<select id="time"><option value="">Any time</option><option value="15">15 min or less</option><option value="30">30 min or less</option><option value="60">Up to an hour</option></select></label><label>Setting<select id="setting"><option value="">Anywhere</option><option value="Indoors">Indoors</option><option value="Outdoors">Outdoors</option></select></label><label>Mess level<select id="mess"><option value="">Any mess</option><option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option></select></label><button class="reset" id="reset">Reset</button></div></div><div class="category-row" role="group" aria-label="Activity categories"><button class="chip selected" data-category="All">✳ &nbsp; All activities</button><button class="chip" data-category="Make & create">✂ &nbsp; Make & create</button><button class="chip" data-category="Explore nature">❀ &nbsp; Explore nature</button><button class="chip" data-category="Move & play">↝ &nbsp; Move & play</button><button class="chip" data-category="Little scientists">⚗ &nbsp; Little scientists</button></div></div><div class="results-heading"><p id="result-count" aria-live="polite"></p><span>Swipe a little. Play a lot.</span></div><section id="swipe-discovery" aria-label="Swipe to discover activities"><div class="deck-layout"><aside class="deck-aside"><span class="eyebrow">A LITTLE SPARK FOR YOUR DAY</span><h1>Find their<br>next favorite<br><em>thing to do.</em></h1><p>One simple idea at a time.<br>Keep what you love. Skip what you don’t.</p><div class="swipe-legend"><span>← Pass for now</span><span>Save for later ♡ →</span></div><div class="aside-note">✳ &nbsp; Real-world fun. Right at your fingertips.</div></aside><div class="deck-column"><div id="deck" class="deck" aria-label="Activity cards"></div><div class="deck-actions"><div><button id="undo" class="action undo" aria-label="Undo last swipe" disabled>↶</button><span>Undo</span></div><div><button id="pass" class="action pass" aria-label="Pass on this activity">×</button><span>Not today</span></div><div><button id="details" class="action details" aria-label="View activity instructions">i</button><span>How to play</span></div><div><button id="like" class="action like" aria-label="Save this activity">♥</button><span>Love it</span></div></div><p class="deck-hint">Swipe left to pass · swipe right to save</p><p id="deck-announcement" class="sr-only" role="status" aria-live="polite"></p></div><aside class="deck-note"><span>GOOD TO KNOW</span><p>No fancy supplies.<br>No perfect results.<br><strong>Just time together.</strong></p><span class="note-heart">♡</span></aside></div></section><div class="activity-grid" id="activity-grid"></div><div class="empty" id="empty" hidden><span>☀</span><h3>A little room for possibility</h3><p id="empty-message"></p><button class="primary" id="empty-reset">Explore all activities</button></div></section></main><footer><span>✳ &nbsp; Small moments. Big memories.</span><button id="install-help" class="install-help">↗ &nbsp; Add to your phone</button></footer><dialog id="install-dialog" aria-labelledby="install-title"><div class="dialog-body"><button id="install-close" class="close-dialog" aria-label="Close installation instructions">×</button><span class="eyebrow">A LITTLE PLAY, ALWAYS HANDY</span><h2 id="install-title">Make room for play.</h2><p>Add PlayPicker to your home screen. No app store needed.</p><h3>On iPhone</h3><p>Open this site in Safari, tap Share, then <strong>Add to Home Screen</strong>. Leave <strong>Open as Web App</strong> enabled if shown, then tap Add.</p><h3>On Android</h3><p>Open this site in Chrome, open the ⋮ menu, then choose <strong>Add to Home screen</strong> or <strong>Install app</strong>.</p><p class="tip">For installation and offline play, use an HTTPS address. Your saved activities stay in this browser on this device.</p><button id="native-install" class="primary" hidden>Install PlayPicker</button></div></dialog><dialog id="activity-dialog" aria-labelledby="dialog-title"><button class="close-dialog" aria-label="Close activity">×</button><div id="dialog-content"></div></dialog><div class="toast" role="status" id="toast"></div></body></html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fbf9f3" />
+    <meta
+      name="description"
+      content="Less screen time, more play time. Discover simple, creative activities for your family with PlayPicker."
+      data-i18n-content="Less screen time, more play time. Discover simple, creative activities for your family with PlayPicker."
+    />
+    <title data-i18n="PlayPicker — Little ideas. Big adventures.">
+      PlayPicker — Little ideas. Big adventures.
+    </title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="PlayPicker" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="activities.js" defer></script>
+    <script src="illustrations.js" defer></script>
+    <script src="i18n.js" defer></script>
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content"
+      ><span data-i18n="Skip to activities">Skip to activities</span></a
+    >
+    <header class="header">
+      <a
+        class="brand"
+        href="./"
+        aria-label="PlayPicker home"
+        data-i18n-aria-label="PlayPicker home"
+        ><span class="brand-mark" aria-hidden="true">✳</span>PlayPicker<span
+          class="brand-dot"
+          aria-hidden="true"
+          >•</span
+        ></a
+      >
+      <nav aria-label="Main navigation" data-i18n-aria-label="Main navigation">
+        <button class="nav-button active" id="discover" type="button">
+          <span data-i18n="Discover">Discover</span></button
+        ><button class="nav-button" id="saved" type="button">
+          <span data-i18n="My collection">My collection</span
+          ><span id="saved-count">0</span>
+        </button>
+      </nav>
+      <button
+        id="language-toggle"
+        class="language-toggle"
+        type="button"
+        aria-label="Cambiar a español"
+        lang="es"
+      >
+        ES</button
+      ><span class="header-note"
+        ><span data-i18n="Less scrolling. More playing."
+          >Less scrolling. More playing.</span
+        ></span
+      >
+    </header>
+    <main id="main-content" tabindex="-1">
+      <section class="browse" aria-labelledby="browse-title">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow"
+              ><span data-i18n="FIND YOUR NEXT LITTLE ADVENTURE"
+                >FIND YOUR NEXT LITTLE ADVENTURE</span
+              ></span
+            >
+            <h1 id="browse-title">
+              <span data-i18n="Your next “let’s do that!”"
+                >Your next “let’s do that!”</span
+              >
+            </h1>
+          </div>
+          <button
+            id="filter-toggle"
+            class="filter-toggle"
+            aria-expanded="false"
+            aria-controls="filter-panel"
+            type="button"
+          >
+            ☷   <span data-i18n="Filters">Filters</span
+            ><span id="filter-count"></span>
+          </button>
+        </div>
+        <div id="filter-panel" hidden>
+          <div class="discovery-controls">
+            <div class="search-wrap">
+              <label for="search"
+                ><span data-i18n="Search activities"
+                  >Search activities</span
+                ></label
+              ><input
+                id="search"
+                type="search"
+                placeholder="Try cardboard, painting, nature…"
+                aria-label="Search activities"
+                data-i18n-aria-label="Search activities"
+                data-i18n-placeholder="Try cardboard, painting, nature…"
+              />
+            </div>
+            <div class="filters">
+              <label
+                ><span data-i18n="Age">Age</span
+                ><select id="age">
+                  <option value="" data-i18n="Any age">Any age</option>
+                  <option value="2" data-i18n="2–3 years">2–3 years</option>
+                  <option value="4" data-i18n="4–5 years">4–5 years</option>
+                  <option value="6" data-i18n="6–8 years">6–8 years</option>
+                  <option value="9" data-i18n="9–12 years">9–12 years</option>
+                </select></label
+              ><label
+                ><span data-i18n="Time">Time</span
+                ><select id="time">
+                  <option value="" data-i18n="Any time">Any time</option>
+                  <option value="15" data-i18n="15 min or less">
+                    15 min or less
+                  </option>
+                  <option value="30" data-i18n="30 min or less">
+                    30 min or less
+                  </option>
+                  <option value="60" data-i18n="Up to an hour">
+                    Up to an hour
+                  </option>
+                </select></label
+              ><label
+                ><span data-i18n="Setting">Setting</span
+                ><select id="setting">
+                  <option value="" data-i18n="Anywhere">Anywhere</option>
+                  <option value="Indoors" data-i18n="Indoors">Indoors</option>
+                  <option value="Outdoors" data-i18n="Outdoors">
+                    Outdoors
+                  </option>
+                </select></label
+              ><label
+                ><span data-i18n="Mess level">Mess level</span
+                ><select id="mess">
+                  <option value="" data-i18n="Any mess">Any mess</option>
+                  <option value="Low" data-i18n="Low">Low</option>
+                  <option value="Medium" data-i18n="Medium">Medium</option>
+                  <option value="High" data-i18n="High">High</option>
+                </select></label
+              ><button class="reset" id="reset" type="button">
+                <span data-i18n="Reset">Reset</span>
+              </button>
+            </div>
+          </div>
+          <div
+            class="category-row"
+            role="group"
+            aria-label="Activity categories"
+            data-i18n-aria-label="Activity categories"
+          >
+            <button class="chip selected" data-category="All" type="button">
+              ✳   <span data-i18n="All activities">All activities</span></button
+            ><button
+              class="chip"
+              data-category="Make &amp; create"
+              type="button"
+            >
+              ✂  
+              <span data-i18n="Make &amp; create"
+                >Make &amp; create</span
+              ></button
+            ><button class="chip" data-category="Explore nature" type="button">
+              ❀   <span data-i18n="Explore nature">Explore nature</span></button
+            ><button class="chip" data-category="Move &amp; play" type="button">
+              ↝  
+              <span data-i18n="Move &amp; play">Move &amp; play</span></button
+            ><button
+              class="chip"
+              data-category="Little scientists"
+              type="button"
+            >
+              ⚗   <span data-i18n="Little scientists">Little scientists</span>
+            </button>
+          </div>
+        </div>
+        <div class="results-heading">
+          <p id="result-count"></p>
+          <span
+            ><span data-i18n="Swipe a little. Play a lot."
+              >Swipe a little. Play a lot.</span
+            ></span
+          >
+        </div>
+        <section
+          id="swipe-discovery"
+          aria-label="Swipe to discover activities"
+          data-i18n-aria-label="Swipe to discover activities"
+        >
+          <div class="deck-layout">
+            <aside class="deck-aside">
+              <span class="eyebrow"
+                ><span data-i18n="A LITTLE SPARK FOR YOUR DAY"
+                  >A LITTLE SPARK FOR YOUR DAY</span
+                ></span
+              >
+              <h2>
+                <span data-i18n="Find their next favorite thing to do."
+                  >Find their next favorite thing to do.</span
+                >
+              </h2>
+              <p>
+                <span
+                  data-i18n="One simple idea at a time. Keep what you love. Skip what you don’t."
+                  >One simple idea at a time. Keep what you love. Skip what you
+                  don’t.</span
+                >
+              </p>
+              <div class="swipe-legend">
+                <span
+                  ><span data-i18n="← Pass for now">← Pass for now</span></span
+                ><span
+                  ><span data-i18n="Save for later ♡ →"
+                    >Save for later ♡ →</span
+                  ></span
+                >
+              </div>
+              <div class="aside-note">
+                ✳  
+                <span data-i18n="Real-world fun. Right at your fingertips."
+                  >Real-world fun. Right at your fingertips.</span
+                >
+              </div>
+            </aside>
+            <div class="deck-column">
+              <div
+                id="deck"
+                class="deck"
+                aria-label="Activity cards"
+                data-i18n-aria-label="Activity cards"
+              ></div>
+              <div class="deck-actions">
+                <div>
+                  <button
+                    id="undo"
+                    class="action undo"
+                    aria-labelledby="undo-label"
+                    disabled
+                    type="button"
+                  >
+                    ↶</button
+                  ><span id="undo-label"
+                    ><span data-i18n="Undo">Undo</span></span
+                  >
+                </div>
+                <div>
+                  <button
+                    id="pass"
+                    class="action pass"
+                    aria-labelledby="pass-label"
+                    type="button"
+                  >
+                    ×</button
+                  ><span id="pass-label"
+                    ><span data-i18n="Not today">Not today</span></span
+                  >
+                </div>
+                <div>
+                  <button
+                    id="details"
+                    class="action details"
+                    aria-labelledby="details-label"
+                    type="button"
+                  >
+                    i</button
+                  ><span id="details-label"
+                    ><span data-i18n="How to play">How to play</span></span
+                  >
+                </div>
+                <div>
+                  <button
+                    id="like"
+                    class="action like"
+                    aria-labelledby="like-label"
+                    type="button"
+                  >
+                    ♥</button
+                  ><span id="like-label"
+                    ><span data-i18n="Love it">Love it</span></span
+                  >
+                </div>
+              </div>
+              <p class="deck-hint">
+                <span data-i18n="Swipe left to pass · swipe right to save"
+                  >Swipe left to pass · swipe right to save</span
+                >
+              </p>
+            </div>
+            <aside class="deck-note">
+              <span><span data-i18n="GOOD TO KNOW">GOOD TO KNOW</span></span>
+              <p>
+                <span
+                  data-i18n="No fancy supplies. No perfect results. Just time together."
+                  >No fancy supplies. No perfect results. Just time
+                  together.</span
+                >
+              </p>
+              <span class="note-heart">♡</span>
+            </aside>
+          </div>
+        </section>
+        <div class="activity-grid" id="activity-grid"></div>
+        <div class="empty" id="empty" hidden>
+          <span>☀</span>
+          <h2>
+            <span data-i18n="A little room for possibility"
+              >A little room for possibility</span
+            >
+          </h2>
+          <p id="empty-message"></p>
+          <button class="primary" id="empty-reset" type="button">
+            <span data-i18n="Explore all activities"
+              >Explore all activities</span
+            >
+          </button>
+        </div>
+      </section>
+      <p
+        id="deck-announcement"
+        class="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      ></p>
+      <div class="toast" id="toast"></div>
+    </main>
+    <footer>
+      <span
+        >✳  
+        <span data-i18n="Small moments. Big memories."
+          >Small moments. Big memories.</span
+        ></span
+      ><button id="install-help" class="install-help" type="button">
+        ↗   <span data-i18n="Add to your phone">Add to your phone</span>
+      </button>
+    </footer>
+    <dialog id="install-dialog" aria-labelledby="install-title">
+      <div class="dialog-body">
+        <button
+          id="install-close"
+          class="close-dialog"
+          aria-label="Close installation instructions"
+          data-i18n-aria-label="Close installation instructions"
+          type="button"
+        >
+          ×</button
+        ><span class="eyebrow"
+          ><span data-i18n="A LITTLE PLAY, ALWAYS HANDY"
+            >A LITTLE PLAY, ALWAYS HANDY</span
+          ></span
+        >
+        <h2 id="install-title">
+          <span data-i18n="Make room for play.">Make room for play.</span>
+        </h2>
+        <p>
+          <span
+            data-i18n="Add PlayPicker to your home screen. No app store needed."
+            >Add PlayPicker to your home screen. No app store needed.</span
+          >
+        </p>
+        <h3><span data-i18n="On iPhone">On iPhone</span></h3>
+        <p>
+          <span
+            data-i18n="Open this site in Safari, tap Share, then Add to Home Screen. Leave Open as Web App enabled if shown, then tap Add."
+            >Open this site in Safari, tap Share, then Add to Home Screen. Leave
+            Open as Web App enabled if shown, then tap Add.</span
+          >
+        </p>
+        <h3><span data-i18n="On Android">On Android</span></h3>
+        <p>
+          <span
+            data-i18n="Open this site in Chrome, open the ⋮ menu, then choose Add to Home screen or Install app."
+            >Open this site in Chrome, open the ⋮ menu, then choose Add to Home
+            screen or Install app.</span
+          >
+        </p>
+        <p class="tip">
+          <span
+            data-i18n="For installation and offline play, use an HTTPS address. Your saved activities stay in this browser on this device."
+            >For installation and offline play, use an HTTPS address. Your saved
+            activities stay in this browser on this device.</span
+          >
+        </p>
+        <button id="native-install" class="primary" hidden type="button">
+          <span data-i18n="Install PlayPicker">Install PlayPicker</span>
+        </button>
+      </div>
+    </dialog>
+    <dialog id="activity-dialog" aria-labelledby="dialog-title">
+      <button
+        class="close-dialog"
+        aria-label="Close activity"
+        data-i18n-aria-label="Close activity"
+        type="button"
+      >
+        ×
+      </button>
+      <div id="dialog-content"></div>
+      <p
+        id="dialog-status"
+        class="sr-only"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      ></p>
+    </dialog>
+  </body>
+</html>
